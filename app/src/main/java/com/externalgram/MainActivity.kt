@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.externalgram
 
 import android.os.Bundle
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +29,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -144,7 +149,7 @@ fun ChatsScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {}) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Поиск"
@@ -161,6 +166,7 @@ fun ChatsScreen(
             )
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -267,6 +273,7 @@ fun ChatScreen(
     onBackClick: () -> Unit
 ) {
     var messageText by remember { mutableStateOf("") }
+
     var messages by remember {
         mutableStateOf(
             listOf(
@@ -304,6 +311,7 @@ fun ChatScreen(
             )
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -396,6 +404,7 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -411,12 +420,15 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(text = "Размер текста")
+
             Text(
                 text = "Стандартный",
                 color = Color.Gray
             )
 
-            Divider(modifier = Modifier.padding(vertical = 16.dp))
+            Divider(
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
 
             Text(
                 text = "Функции Externalgram",
@@ -461,7 +473,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { },
+                onClick = {},
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Настройка шрифтов")
@@ -470,7 +482,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { },
+                onClick = {},
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Встроенный переводчик")
