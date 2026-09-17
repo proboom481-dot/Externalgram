@@ -18,16 +18,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,77 +47,93 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-data class Chat(
-    val name: String,
-    val message: String,
-    val time: String,
-    val emoji: String
-)
-
-private val demoChats = listOf(
-    Chat("Артём 👑", "Привет! Это Externalgram", "12:40", "А"),
-    Chat("Друзья", "Кто сегодня играет?", "12:15", "Д"),
-    Chat("Новости", "Новые сообщения в канале", "11:58", "Н"),
-    Chat("Избранное", "Сохранённое сообщение", "Вчера", "И")
-)
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ExternalgramApp()
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    ExternalgramApp()
+                }
+            }
         }
     }
 }
 
 @Composable
 fun ExternalgramApp() {
-    var darkTheme by remember { mutableStateOf(false) }
-    var selectedChat by remember { mutableStateOf<Chat?>(null) }
+    var currentScreen by remember { mutableStateOf("chats") }
+    var selectedChat by remember { mutableStateOf("") }
 
-    MaterialTheme(
-        colorScheme = if (darkTheme) {
-            androidx.compose.material3.darkColorScheme(
-                primary = Color(0xFF3390EC),
-                background = Color(0xFF17212B),
-                surface = Color(0xFF17212B)
-            )
-        } else {
-            androidx.compose.material3.lightColorScheme(
-                primary = Color(0xFF3390EC),
-                background = Color.White,
-                surface = Color.White
+    when (currentScreen) {
+        "chats" -> {
+            ChatsScreen(
+                onChatClick = { chatName ->
+                    selectedChat = chatName
+                    currentScreen = "chat"
+                },
+                onSettingsClick = {
+                    currentScreen = "settings"
+                }
             )
         }
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            if (selectedChat == null) {
-                ChatListScreen(
-                    darkTheme = darkTheme,
-                    onToggleTheme = { darkTheme = !darkTheme },
-                    onChatClick = { selectedChat = it }
-                )
-            } else {
-                ChatScreen(
-                    chat = selectedChat!!,
-                    onBack = { selectedChat = null }
-                )
-            }
+
+        "chat" -> {
+            ChatScreen(
+                chatName = selectedChat,
+                onBackClick = {
+                    currentScreen = "chats"
+                }
+            )
+        }
+
+        "settings" -> {
+            SettingsScreen(
+                onBackClick = {
+                    currentScreen = "chats"
+                }
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+data class ChatItem(
+    val name: String,
+    val message: String,
+    val time: String,
+    val color: Color
+)
+
 @Composable
-fun ChatListScreen(
-    darkTheme: Boolean,
-    onToggleTheme: () -> Unit,
-    onChatClick: (Chat) -> Unit
+fun ChatsScreen(
+    onChatClick: (String) -> Unit,
+    onSettingsClick: () -> Unit
 ) {
+    val chats = listOf(
+        ChatItem(
+            name = "Артём",
+            message = "Привет! Как дела?",
+            time = "21:30",
+            color = Color(0xFF4CAF50)
+        ),
+        ChatItem(
+            name = "Externalgram News",
+            message = "Добро пожаловать в Externalgram",
+            time = "20:15",
+            color = Color(0xFF2196F3)
+        ),
+        ChatItem(
+            name = "Рабочая группа",
+            message = "Новое сообщение",
+            time = "19:48",
+            color = Color(0xFFFF9800)
+        )
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -129,60 +143,60 @@ fun ChatListScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Меню"
-                        )
-                    }
-                },
                 actions = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Поиск"
                         )
                     }
 
-                    IconButton(onClick = onToggleTheme) {
+                    IconButton(onClick = onSettingsClick) {
                         Icon(
-                            imageVector = Icons.Default.DarkMode,
-                            contentDescription = "Тема"
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Настройки"
                         )
                     }
                 }
             )
         }
-    ) { padding ->
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(paddingValues)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .background(Color(0xFFE8F2FF))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Все",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                Icon(
+                    imageVector = Icons.Default.Chat,
+                    contentDescription = null,
+                    tint = Color(0xFF1976D2)
                 )
-                Text("Личные")
-                Text("Группы")
-                Text("Каналы")
+
+                Spacer(modifier = Modifier.size(10.dp))
+
+                Text(
+                    text = "Демонстрационный режим",
+                    color = Color(0xFF1976D2),
+                    fontSize = 14.sp
+                )
             }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(demoChats) { chat ->
+                items(chats) { chat ->
                     ChatRow(
                         chat = chat,
-                        onClick = { onChatClick(chat) }
+                        onClick = {
+                            onChatClick(chat.name)
+                        }
                     )
                 }
             }
@@ -192,7 +206,7 @@ fun ChatListScreen(
 
 @Composable
 fun ChatRow(
-    chat: Chat,
+    chat: ChatItem,
     onClick: () -> Unit
 ) {
     Row(
@@ -204,4 +218,263 @@ fun ChatRow(
     ) {
         Box(
             modifier = Modifier
-                .size
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(chat.color),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = chat.name.take(1),
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.size(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = chat.name,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            Text(
+                text = chat.message,
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
+        }
+
+        Text(
+            text = chat.time,
+            color = Color.Gray,
+            fontSize = 12.sp
+        )
+    }
+
+    Divider()
+}
+
+@Composable
+fun ChatScreen(
+    chatName: String,
+    onBackClick: () -> Unit
+) {
+    var messageText by remember { mutableStateOf("") }
+    var messages by remember {
+        mutableStateOf(
+            listOf(
+                "Привет! Это демонстрационный чат Externalgram.",
+                "Здесь позже будут реальные сообщения Telegram."
+            )
+        )
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = chatName,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text = "был недавно",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(messages) { message ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = Color(0xFFE8F2FF),
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                                .padding(12.dp)
+                        ) {
+                            Text(text = message)
+                        }
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = messageText,
+                    onValueChange = { messageText = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = {
+                        Text("Сообщение")
+                    },
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                IconButton(
+                    onClick = {
+                        if (messageText.isNotBlank()) {
+                            messages = messages + messageText
+                            messageText = ""
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "Отправить",
+                        tint = Color(0xFF1976D2)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingsScreen(
+    onBackClick: () -> Unit
+) {
+    var streamerMode by remember { mutableStateOf(false) }
+    var filtersEnabled by remember { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Настройки")
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Внешний вид",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Размер текста")
+            Text(
+                text = "Стандартный",
+                color = Color.Gray
+            )
+
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+
+            Text(
+                text = "Функции Externalgram",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    streamerMode = !streamerMode
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (streamerMode) {
+                        "Streamer Mode: включён"
+                    } else {
+                        "Streamer Mode: выключен"
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    filtersEnabled = !filtersEnabled
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (filtersEnabled) {
+                        "Текстовые фильтры: включены"
+                    } else {
+                        "Текстовые фильтры: выключены"
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Настройка шрифтов")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Встроенный переводчик")
+            }
+        }
+    }
+}
